@@ -47,10 +47,11 @@ export default function InfoUploadForm({ onInfoVerified }) {
     setLoading(true);
 
     try {
-      const res = await axios.post("http://localhost:5000/api/register",  {
-    ...form,
-    phone: sanitizedPhone,
-  });
+    const BASE_URL = "https://api.bloomwomxn.com"; // live backend
+const res = await axios.post(`${BASE_URL}/api/register`, {
+  ...form,
+  phone: sanitizedPhone,
+});
 
       if (res.data.success) {
         localStorage.setItem("bloomUser", JSON.stringify(res.data.user));
