@@ -1,10 +1,12 @@
 import { useRef, useState, useEffect } from "react";
 import Webcam from "react-webcam";
+import { useNavigate } from "react-router-dom";
 
 
 export default function FaceVerification({ onVerified }) {
   const webcamRef = useRef(null);
   const mediaRecorderRef = useRef(null);
+const navigate = useNavigate();
 
   const [recording, setRecording] = useState(false);
   const [videoUrl, setVideoUrl] = useState(null);
@@ -206,16 +208,38 @@ const resetVerification = () => {
   setShowApprovedPopup(false);
 };
 
+
+
+
  // Called when user clicks continue on approved popup
-  const handleApprovedContinue = () => {
-    setShowApprovedPopup(false);
-    if (onVerified) onVerified();
-  };
+ const handleApprovedContinue = () => {
+  setShowApprovedPopup(false);
+  if (typeof onVerified === "function") onVerified(); // step moves to InfoUploadForm
+  navigate("/info"); // redirect if needed
+};
+
+
+
 
   return (
     <div className="min-h-screen flex flex-col items-center justify-center bg-white p-6">
      
-     
+     {showApprovedPopup && (
+  <div className="fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center z-50 p-2">
+    <div className="bg-white p-4 rounded-lg max-w-lg w-full relative">
+      <p className="text-lg font-bold text-green-600 mb-4">
+        ✅ Your verification is approved!
+      </p>
+      <button
+        onClick={handleApprovedContinue}
+        className="px-6 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700"
+      >
+        Continue
+      </button>
+    </div>
+  </div>
+)}
+
        {/* Notification */}
   {notification.message && (
   <div
