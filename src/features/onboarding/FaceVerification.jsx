@@ -166,7 +166,8 @@ useEffect(() => {
   
 
     try {
-      const res = await fetch(`http://localhost:5000/api/verify-face/${submissionId}`);
+    const res = await fetch(`${SERVER_URL}/api/verify-face/${submissionId}`);
+
       if (!res.ok) throw new Error("Failed to fetch status");
       const data = await res.json();
 
