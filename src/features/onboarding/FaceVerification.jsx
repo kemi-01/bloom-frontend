@@ -274,8 +274,8 @@ const resetVerification = () => {
           aria-label="Camera preview"
         />
         {recording && (
-          <div className="absolute inset-0 flex items-center justify-center text-white font-bold bg-purple-600 bg-opacity-30">
-            Recording...
+          <div className="absolute inset-0 flex items-center justify-center text-white font-bold  bg-opacity-30">
+            
           </div>
         )}
       </div>
