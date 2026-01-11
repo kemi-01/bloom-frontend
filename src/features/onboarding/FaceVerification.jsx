@@ -109,7 +109,8 @@ const [showApprovedPopup, setShowApprovedPopup] = useState(false);
        setNotification("Verification submitted. We’ll check and get back to you shortly.");
         setStatus("pending");
         setSubmissionId(data.submission._id);
-        setTimer(40); // start 40s timer
+        setTimer(30 * 60); // 30 minutes = 1800 seconds
+
         setHoldTimer(0);
   setShowHoldOption(false);
         setHoldExtra(false);
@@ -124,14 +125,16 @@ const [showApprovedPopup, setShowApprovedPopup] = useState(false);
     }
   };
 
- // Initial 40s countdown
-  
-  // 40-second timer (only after submit)
+
+ 
 useEffect(() => {
   if (timer <= 0) {
-    if (submissionId) setShowHoldOption(true); // only show hold if submitted
-    return;
+  if (submissionId) {
+    setShowHoldOption(true); // show choice ONLY
   }
+  return;
+}
+
 
   const countdown = setInterval(() => {
     setTimer((prev) => (prev <= 1 ? 0 : prev - 1));
@@ -140,12 +143,7 @@ useEffect(() => {
   return () => clearInterval(countdown);
 }, [timer, submissionId]);
 
-// Automatically start 30s hold after 40s
-useEffect(() => {
-  if (timer === 0 && showHoldOption && holdTimer === 0 && submissionId) {
-    setHoldTimer(30);
-  }
-}, [timer, showHoldOption, holdTimer, submissionId]);
+
 
 // 30s hold countdown
 useEffect(() => {
@@ -157,6 +155,17 @@ useEffect(() => {
 
   return () => clearInterval(countdown);
 }, [holdTimer]);
+
+
+
+
+
+const startHold = () => {
+  setHoldExtra(true);
+  setShowHoldOption(false);
+  setHoldTimer(5 * 60); // or 30 * 60 if you want 30 mins
+};
+
 
 
 // Polling for verification status
@@ -389,21 +398,21 @@ const resetVerification = () => {
     )}
 
           {/* Timer UI */}
-          {timer > 0 && (
+             {timer > 0 && (
             <p className="mt-2 text-center text-gray-700 font-medium">
               Please wait {Math.floor(timer / 60)}:{("0" + (timer % 60)).slice(-2)} before retrying.
-            </p>
-          )}
-
-          {timer === 0 && holdTimer === 0 && showHoldOption && (
-            <p className="mt-2 text-center text-yellow-800 font-medium">
-              thank you for your patience we may take a little longer to verify your identity.
             </p>
           )}
 
           {holdTimer > 0 && (
             <p className="mt-2 text-center text-gray-700 font-medium">
               Hold active: {Math.floor(holdTimer / 60)}:{("0" + (holdTimer % 60)).slice(-2)} remaining
+            </p>
+          )}
+
+          {timer === 0 && holdTimer === 0 && showHoldOption && (
+            <p className="mt-2 text-center text-yellow-800 font-medium">
+              Thank you for your patience. We may take a little longer to verify your identity.
             </p>
           )}
 
@@ -415,7 +424,15 @@ const resetVerification = () => {
   
 
       )}
-   
+{showHoldOption && (
+  <div>
+    <p>Your verification is still under review.</p>
+    <button onClick={startHold}>
+      Wait {holdTimer === 0 ? "5" : Math.floor(holdTimer / 60)} more minutes
+    </button>
+  </div>
+)}
+
 
 
 

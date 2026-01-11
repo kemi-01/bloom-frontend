@@ -127,6 +127,7 @@ import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
 import { useEffect, useState } from "react";
 import Us from "../../pages/Us";
+import WhyBloom from "../../components/WhyBloom";
 import PaymentModal from "../../components/PaymentModal";
  // adjust path as needed
 
@@ -219,6 +220,7 @@ export default function WelcomeScreen({ user: propUser }) {
       </div>
 
       <Us />
+      <WhyBloom />
 
       {/* Payment Modal */}
       {showPayment && (

@@ -18,6 +18,7 @@ const [pronouns, setPronouns] = useState("");
 const [uploading, setUploading] = useState(false);
 const [deleteFiles, setDeleteFiles] = useState([]);
 
+
 const API_URL = import.meta.env.VITE_SERVER_URL;
 
 // Load existing discover info

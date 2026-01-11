@@ -35,6 +35,15 @@ export default function Settings() {
         >
           Log Out
         </li>
+
+         <li
+          className="bg-blue-600 p-3 rounded cursor-pointer hover:bg-blue-500 text-center"
+          onClick={() => {
+            window.open("https://www.tiktok.com/@bloom.womxn?_r=1&_t=ZS-92ymBC57hXF", "_blank");
+          }}
+        >
+          Need Help?  we are here for you!
+        </li>
       </ul>
     </div>
   );
