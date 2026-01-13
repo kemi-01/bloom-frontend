@@ -4707,8 +4707,20 @@ const isOwner = currentUser?._id === user?._id;
 </div>
 
 
+ {/* Add new post button */}
+ {isOwner && (
+  <div
+    key="add-post-btn"
+    onClick={() => setShowAddPost(true)}
+    className="flex justify-center items-center border border-gray-300 cursor-pointer h-24 text-red-500 font-bold"
+  >
+    +
+  </div>
+)}
+
 {/* Posts Grid */}
-<div className="grid grid-cols-3 gap-2 mb-6">
+<div className="flex flex-col gap-6 mb-20 px-2">
+
   {(user.posts || [])
     .filter(post => tab === "all" || (post.files || []).some(f => f.type === tab))
     .flatMap(post =>
@@ -4721,9 +4733,10 @@ const isOwner = currentUser?._id === user?._id;
             onClick={() => setSelectedPost(post)}
           >
             {file.type === "image" ? (
-              <img src={file.url} className="w-full h-24 object-cover" />
+              <img src={file.url} className="w-full aspect-square object-cover"
+ />
             ) : (
-              <video src={file.url} className="w-full h-24 object-cover" controls />
+              <video src={file.url} className="w-full aspect-square object-cover" controls />
             )}
 
             {/* Delete icon */}
@@ -4755,19 +4768,9 @@ const isOwner = currentUser?._id === user?._id;
         ))
     )}
 
-  {/* Add new post button */}
- {isOwner && (
-  <div
-    key="add-post-btn"
-    onClick={() => setShowAddPost(true)}
-    className="flex justify-center items-center border border-gray-300 cursor-pointer h-24 text-red-500 font-bold"
-  >
-    +
-  </div>
-)}
+ 
 
 </div>
-
 
 
       {/* Modal for viewing post */}

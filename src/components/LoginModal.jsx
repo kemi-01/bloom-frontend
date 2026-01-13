@@ -79,6 +79,11 @@ export default function LoginModal({ onClose }) {
 
           <h2 className="text-xl font-bold mb-4">Login to Bloom</h2>
 
+       <h2 className="text-l  mb-4 text-red-500">
+  Please note: letters must match exactly (capital and small letters matter)
+</h2>
+
+
           {/* Username Input */}
           <input
             type="text"
