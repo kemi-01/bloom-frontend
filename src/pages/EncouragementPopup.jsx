@@ -85,7 +85,8 @@ export default function EncouragementPopup() {
       animate={{ x: 0, opacity: 1 }}
       exit={{ x: 300, opacity: 0 }}
       transition={{ type: "spring", stiffness: 300, damping: 30 }}
-     className="fixed right-5 top-20 z-50 w-80 md:w-96 bg-gradient-to-br from-purple-600/30 to-pink-500/30 text-white rounded-2xl shadow-2xl p-6 backdrop-blur-lg border border-white/20"
+    className="fixed right-5 bottom-6 z-40 w-80 md:w-96 bg-gradient-to-br from-purple-600/30 to-pink-500/30 text-white rounded-2xl shadow-2xl p-6 backdrop-blur-lg border border-white/20"
+
 
     >
       {/* Close button

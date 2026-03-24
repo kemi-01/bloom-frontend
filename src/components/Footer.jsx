@@ -29,13 +29,13 @@ export default function Footer() {
         <div>
           <h4 className="text-lg font-semibold mb-3">Follow Us</h4>
           <div className="flex space-x-4 text-xl">
-            <a href="https://www.instagram.com/bloomwomxn?igsh=MWpyc2toaWZ5c20zNg%3D%3D&utm_source=qr" target="_blank" rel="noopener noreferrer" className="hover:text-pink-400">
+            <a href="https://www.instagram.com/bloom_womxn?igsh=MTAwZjdvY3NzejdkMQ%3D%3D&utm_source=qr" className="hover:text-pink-400">
               <FaInstagram />
             </a>
-            <a href="https://www.facebook.com/share/1atDPXthd8/?mibextid=wwXIfr" target="_blank" rel="noopener noreferrer" className="hover:text-blue-600">
+            {/* <a href="https://www.facebook.com/share/1atDPXthd8/?mibextid=wwXIfr" target="_blank" rel="noopener noreferrer" className="hover:text-blue-600">
               <FaFacebookF />
-            </a>
-            <a href="https://www.tiktok.com/@bloom.womxn?_r=1&_t=ZS-92i5er2mJDU" target="_blank" rel="noopener noreferrer" className="hover:text-gray-100">
+            </a> */}
+            <a href="https://www.tiktok.com/@bloom.womxnn?_r=1&_t=ZS-94xkqxiHu1U" target="_blank" rel="noopener noreferrer" className="hover:text-gray-100">
               <FaTiktok />
             </a>
           </div>

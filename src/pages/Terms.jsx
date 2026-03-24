@@ -68,7 +68,7 @@ export default function Terms() {
             For any questions regarding these Terms & Conditions, contact us at:
           </p>
           <ul className="list-disc ml-6 mt-2 space-y-1 text-gray-700">
-            <li>Email: <span className="text-purple-700">support@bloom.com</span></li>
+            <li>Email: <span className="text-purple-700">bloomwomxn@gmail.com</span></li>
            
           </ul>
         </section>

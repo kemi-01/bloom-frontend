@@ -118,7 +118,7 @@ export default function Privacy1() {
             data practices, please reach out to us:
           </p>
           <ul className="list-disc ml-6 mt-2 space-y-1 text-gray-700">
-            <li>Email: <span className="text-purple-700">support@bloom.com</span></li>
+            <li>Email: <span className="text-purple-700">bloomwomxn@gmail.com</span></li>
         
           </ul>
         </section>
