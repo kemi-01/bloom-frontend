@@ -62,7 +62,7 @@ export default function PaymentModal({ onClose, onPaymentSuccess }) {
  const allowedCurrencies = {
   // Paystack supports these currencies
   paystack: [
-   "NGN", "GHS", "ZAR", "KES", "XOF"
+   "NGN"
   ],
 
   // Flutterwave supports many more
