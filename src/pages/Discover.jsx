@@ -2,6 +2,7 @@
 
 
 
+
 // src/pages/Discover.jsx
 import React, { useState, useEffect } from "react";
 import axios from "axios";
@@ -28,6 +29,22 @@ export default function Discover() {
 
   const [isUnlocked, setIsUnlocked] = useState(currentUser?.bloomAccess === true);
 
+
+  // 🔥 Swipe limit
+const [swipeCount, setSwipeCount] = useState(0);
+const MAX_FREE_SWIPES = 3;
+
+// 🔥 Access control
+const checkAccess = () => {
+  if (isUnlocked) return true;
+
+  if (swipeCount >= MAX_FREE_SWIPES) {
+    setShowPaymentModal(true);
+    return false;
+  }
+
+  return true;
+};
   const API_URL = import.meta.env.VITE_SERVER_URL;
 
 
@@ -56,17 +73,25 @@ export default function Discover() {
     fetchProfiles();
   }, []);
 
-  const handleNextProfile = () => {
-    if (!profiles.length) return;
-    setCurrentIndex((prev) => (prev + 1) % profiles.length);
-    setCurrentImageIndex(0);
-  };
+ const handleNextProfile = () => {
+  if (!profiles.length) return;
 
-  const handlePrevProfile = () => {
-    if (!profiles.length) return;
-    setCurrentIndex((prev) => (prev - 1 + profiles.length) % profiles.length);
-    setCurrentImageIndex(0);
-  };
+  if (!checkAccess()) return;
+
+  setSwipeCount((prev) => prev + 1);
+  setCurrentIndex((prev) => (prev + 1) % profiles.length);
+  setCurrentImageIndex(0);
+};
+
+const handlePrevProfile = () => {
+  if (!profiles.length) return;
+
+  if (!checkAccess()) return;
+
+  setSwipeCount((prev) => prev + 1);
+  setCurrentIndex((prev) => (prev - 1 + profiles.length) % profiles.length);
+  setCurrentImageIndex(0);
+};
 
   const handleNextImage = () => {
     const images = profiles[currentIndex]?.discover?.images || [];
@@ -116,13 +141,17 @@ export default function Discover() {
   }
 
   const handlePaymentSuccess = (updatedUser) => {
-    setIsUnlocked(updatedUser.bloomAccess);
-    localStorage.setItem("bloomUser", JSON.stringify(updatedUser));
-    setShowPaymentModal(false);
-  };
+  setIsUnlocked(updatedUser.bloomAccess);
+  setSwipeCount(0); // ✅ reset swipes
+  localStorage.setItem("bloomUser", JSON.stringify(updatedUser));
+  setShowPaymentModal(false);
+};
 
   return (
     <div className="flex flex-col items-center justify-center min-h-screen bg-[#111] text-white">
+     
+     
+
       <div className="relative w-full h-[500px]">
         <AnimatePresence>
           {profiles.slice(currentIndex, currentIndex + 3).map((p, idx) => {
@@ -137,14 +166,21 @@ export default function Discover() {
                 drag={isTop ? "x" : false}
                 dragConstraints={{ left: 0, right: 0 }}
                 dragElastic={0.2}
-                onDragEnd={
-                  isTop
-                    ? (_, info) => {
-                        if (info.offset.x < -100) handleNextProfile();
-                        if (info.offset.x > 100) handlePrevProfile();
-                      }
-                    : undefined
-                }
+     onDragEnd={
+  isTop
+    ? (_, info) => {
+        if (!checkAccess()) return;
+
+        if (info.offset.x < -100) {
+          handleNextProfile(); // ✅ no extra count
+        }
+
+        if (info.offset.x > 100) {
+          handlePrevProfile(); // ✅ no extra count
+        }
+      }
+    : undefined
+}
                 initial={{ scale: 0.9 + idx * 0.05, y: idx * 20, opacity: 0 }}
                 animate={{ scale: 1, y: 0, opacity: 1 }}
                 exit={{ x: -300, opacity: 0 }}
@@ -201,6 +237,8 @@ export default function Discover() {
     </div>
   )}
   </div>
+
+ 
                 <div className="absolute bottom-4 right-4 flex flex-col gap-2">
                   <button
                     onClick={(e) => {
@@ -211,16 +249,21 @@ export default function Discover() {
                   >
                     <FaUserCircle size={24} />
                   </button>
+<button
+  onClick={(e) => {
+    e.stopPropagation();
 
-                  <button
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      navigate(`/chat?user=${p._id}`);
-                    }}
-                    className="p-2 rounded-full hover:bg-white/20"
-                  >
-                    <FaEnvelope size={24} />
-                  </button>
+    if (!isUnlocked) {
+      setShowPaymentModal(true);
+      return;
+    }
+
+    navigate(`/chat?user=${p._id}`);
+  }}
+  className="p-2 rounded-full hover:bg-white/20"
+>
+  <FaEnvelope size={24} />
+</button>
                 </div>
 
                 {isTop && (
@@ -323,6 +366,336 @@ export default function Discover() {
     </div>
   );
 }
+
+
+
+
+
+
+// this is the code am using just started using the one up now cause of some changes
+
+
+// // src/pages/Discover.jsx
+// import React, { useState, useEffect } from "react";
+// import axios from "axios";
+// import { useSwipeable } from "react-swipeable";
+// import { useNavigate } from "react-router-dom";
+// import { FaUserCircle, FaEnvelope, FaChevronLeft, FaChevronRight } from "react-icons/fa";
+// import PaymentModal from "./../components/PaymentModal";
+// import { motion, AnimatePresence } from "framer-motion";
+
+// export default function Discover() {
+//   const navigate = useNavigate();
+//   const [profiles, setProfiles] = useState([]);
+//   const [currentIndex, setCurrentIndex] = useState(0);
+//   const [currentImageIndex, setCurrentImageIndex] = useState(0);
+//   const [loading, setLoading] = useState(true);
+
+//   const currentUser = JSON.parse(localStorage.getItem("bloomUser"));
+//   const currentUserId = currentUser?._id;
+
+//   const [showUnlockModal, setShowUnlockModal] = useState(false);
+//   const [showPaymentModal, setShowPaymentModal] = useState(false);
+//   const [showProfilePopup, setShowProfilePopup] = useState(false);
+//   const [popupProfile, setPopupProfile] = useState(null);
+
+//   const [isUnlocked, setIsUnlocked] = useState(currentUser?.bloomAccess === true);
+
+//   const API_URL = import.meta.env.VITE_SERVER_URL;
+
+
+//   useEffect(() => {
+//   const user = JSON.parse(localStorage.getItem("bloomUser"));
+//   setIsUnlocked(user?.bloomAccess === true);
+// }, []);
+
+
+//   // Fetch discover profiles
+//   useEffect(() => {
+//     const fetchProfiles = async () => {
+//       try {
+//         const res = await axios.get(`${API_URL}/api/users/discover/all`, {
+//           headers: { Authorization: `Bearer ${localStorage.getItem("bloomToken")}` },
+//         });
+
+//         // Defensive self-filter
+//         setProfiles(res.data.filter((p) => p._id !== currentUserId));
+//       } catch (err) {
+//         console.error("Error fetching discover profiles:", err);
+//       } finally {
+//         setLoading(false);
+//       }
+//     };
+//     fetchProfiles();
+//   }, []);
+
+//   const handleNextProfile = () => {
+//     if (!profiles.length) return;
+//     setCurrentIndex((prev) => (prev + 1) % profiles.length);
+//     setCurrentImageIndex(0);
+//   };
+
+//   const handlePrevProfile = () => {
+//     if (!profiles.length) return;
+//     setCurrentIndex((prev) => (prev - 1 + profiles.length) % profiles.length);
+//     setCurrentImageIndex(0);
+//   };
+
+//   const handleNextImage = () => {
+//     const images = profiles[currentIndex]?.discover?.images || [];
+//     if (!images.length) return;
+//     setCurrentImageIndex((prev) => (prev + 1) % images.length);
+//   };
+
+//   const handlePrevImage = () => {
+//     const images = profiles[currentIndex]?.discover?.images || [];
+//     if (!images.length) return;
+//     setCurrentImageIndex((prev) => (prev - 1 + images.length) % images.length);
+//   };
+
+//   const swipeHandlers = useSwipeable({
+//     onSwipedLeft: handleNextProfile,
+//     onSwipedRight: handlePrevProfile,
+//     preventDefaultTouchmoveEvent: true,
+//     trackMouse: true,
+//   });
+
+//   const openProfilePopup = async (profile) => {
+//     try {
+//       const res = await axios.get(`${API_URL}/api/users/${profile._id}`, {
+//         headers: { Authorization: `Bearer ${localStorage.getItem("bloomToken")}` },
+//       });
+//       setPopupProfile(res.data);
+//       setShowProfilePopup(true);
+//     } catch (err) {
+//       console.error("Failed to fetch full profile:", err);
+//     }
+//   };
+
+//   if (loading) {
+//     return (
+//       <div className="flex items-center justify-center min-h-screen text-gray-400">
+//         Loading profiles...
+//       </div>
+//     );
+//   }
+
+//   if (!profiles.length) {
+//     return (
+//       <div className="flex items-center justify-center min-h-screen text-gray-400">
+//         No profiles to discover yet.
+//       </div>
+//     );
+//   }
+
+//   const handlePaymentSuccess = (updatedUser) => {
+//     setIsUnlocked(updatedUser.bloomAccess);
+//     localStorage.setItem("bloomUser", JSON.stringify(updatedUser));
+//     setShowPaymentModal(false);
+//   };
+
+//   return (
+//     <div className="flex flex-col items-center justify-center min-h-screen bg-[#111] text-white">
+//       <div className="relative w-full h-[500px]">
+//         <AnimatePresence>
+//           {profiles.slice(currentIndex, currentIndex + 3).map((p, idx) => {
+//             const isTop = idx === 0;
+//             const images = p.discover?.images || [];
+//             const imageIndex = isTop ? currentImageIndex : 0;
+
+//             return (
+//               <motion.div
+//                 key={p._id}
+//                 {...(isTop ? swipeHandlers : {})}
+//                 drag={isTop ? "x" : false}
+//                 dragConstraints={{ left: 0, right: 0 }}
+//                 dragElastic={0.2}
+//                 onDragEnd={
+//                   isTop
+//                     ? (_, info) => {
+//                         if (info.offset.x < -100) handleNextProfile();
+//                         if (info.offset.x > 100) handlePrevProfile();
+//                       }
+//                     : undefined
+//                 }
+//                 initial={{ scale: 0.9 + idx * 0.05, y: idx * 20, opacity: 0 }}
+//                 animate={{ scale: 1, y: 0, opacity: 1 }}
+//                 exit={{ x: -300, opacity: 0 }}
+//                 transition={{ type: "spring", stiffness: 300, damping: 30 }}
+//                 style={{ zIndex: 10 - idx }}
+//                 className="absolute w-full h-full rounded-xl overflow-hidden cursor-pointer"
+//                 onClick={isTop ? handleNextImage : undefined}
+//               >
+//            <div className="absolute inset-0 bg-black">
+//   <img
+//     src={images[imageIndex] || "/placeholder.jpg"}
+//     className="w-full h-full object-cover blur-xl scale-110 opacity-40"
+//   />
+// </div>
+
+// <img
+//   src={images[imageIndex] || "/placeholder.jpg"}
+//   className="relative w-full h-full object-contain"
+//   alt="profile"
+// />
+
+
+// {/* Discover Info Overlay */}
+// <div className="absolute bottom-0 w-full p-4 bg-gradient-to-t from-black/80 via-black/40 to-transparent">
+//   <h3 className="text-lg font-bold text-white">
+//     {p.name}
+//     {p.discover?.pronouns && (
+//       <span className="text-sm text-gray-300 ml-2">
+//         ({p.discover.pronouns})
+//       </span>
+//     )}
+//   </h3>
+
+//   {p.discover?.country && (
+//     <p className="text-sm text-gray-300">{p.discover.country}</p>
+//   )}
+
+//   {p.discover?.writeUp && (
+//     <p className="text-sm text-gray-200 mt-2 line-clamp-3">
+//       {p.discover.writeUp}
+//     </p>
+//   )}
+
+//   {p.discover?.tags?.length > 0 && (
+//     <div className="flex flex-wrap gap-2 mt-2">
+//       {p.discover.tags.slice(0, 6).map((tag) => (
+//         <span
+//           key={tag}
+//           className="px-2 py-1 text-xs bg-purple-600/80 rounded-full text-white"
+//         >
+//           {tag}
+//         </span>
+//       ))}
+//     </div>
+//   )}
+//   </div>
+//                 <div className="absolute bottom-4 right-4 flex flex-col gap-2">
+//                   <button
+//                     onClick={(e) => {
+//                       e.stopPropagation();
+//                       openProfilePopup(p);
+//                     }}
+//                     className="p-2 rounded-full hover:bg-white/20"
+//                   >
+//                     <FaUserCircle size={24} />
+//                   </button>
+
+//                   <button
+//                     onClick={(e) => {
+//                       e.stopPropagation();
+//                       navigate(`/chat?user=${p._id}`);
+//                     }}
+//                     className="p-2 rounded-full hover:bg-white/20"
+//                   >
+//                     <FaEnvelope size={24} />
+//                   </button>
+//                 </div>
+
+//                 {isTop && (
+//                   <>
+//                     <button
+//                       onClick={(e) => {
+//                         e.stopPropagation();
+//                         handlePrevImage();
+//                       }}
+//                       className="absolute left-2 top-1/2 -translate-y-1/2 p-2 rounded-full hover:bg-white/20"
+//                     >
+//                       <FaChevronLeft />
+//                     </button>
+//                     <button
+//                       onClick={(e) => {
+//                         e.stopPropagation();
+//                         handleNextImage();
+//                       }}
+//                       className="absolute right-2 top-1/2 -translate-y-1/2 p-2 rounded-full hover:bg-white/20"
+//                     >
+//                       <FaChevronRight />
+//                     </button>
+//                   </>
+//                 )}
+//               </motion.div>
+//             );
+//           })}
+//         </AnimatePresence>
+//       </div>
+
+//       <button
+//         onClick={() => {
+//           if (!isUnlocked) setShowUnlockModal(true);
+//           else handleNextProfile();
+//         }}
+//         className="mt-4 w-full md:w-[50%] lg:w-[30%] py-3 border border-purple-600 text-purple-600 rounded-xl hover:bg-purple-600 hover:text-white"
+//       >
+//         Discover All
+//       </button>
+
+//       {showProfilePopup && popupProfile && (
+//         <div
+//           className="fixed inset-0 bg-black/70 flex justify-center items-center z-50"
+//           onClick={() => setShowProfilePopup(false)}
+//         >
+//           <div
+//             className="bg-[#111] w-[90%] md:w-[60%] lg:w-[40%] max-h-[90vh] overflow-y-auto p-4 rounded-2xl"
+//             onClick={(e) => e.stopPropagation()}
+//           >
+//             <img
+//               src={popupProfile.profilePics?.[0] || "/placeholder.jpg"}
+//               alt="Profile"
+//               className="w-full h-64 rounded-lg object-cover"
+//             />
+//             <h2 className="text-xl font-bold mt-3">{popupProfile.name}</h2>
+
+//             <button
+//               className="mt-4 px-4 py-2 bg-purple-600 rounded-xl"
+//               onClick={() => navigate(`/profile/${popupProfile._id}`)}
+//             >
+//               View Full Profile
+//             </button>
+//           </div>
+//         </div>
+//       )}
+
+// {showUnlockModal && (
+//   <div className="fixed inset-0 bg-black/70 flex items-center justify-center z-50">
+//     <div className="bg-[#1a1a1a] rounded-2xl p-6 w-[90%] max-w-md text-center">
+//       <h2 className="text-2xl font-semibold mb-3">Hey beautiful 🌸</h2>
+//       <p className="text-gray-300 mb-6">
+//         Unlock Bloom to discover womxn around the world, connect freely, and be seen in a safe, intentional space.
+//       </p>
+//       <button
+//         onClick={() => {
+//           setShowUnlockModal(false);
+//           setShowPaymentModal(true);
+//         }}
+//         className="w-full py-3 bg-purple-600 rounded-xl text-white font-medium mb-3"
+//       >
+//         Unlock Bloom
+//       </button>
+//       <button
+//         onClick={() => setShowUnlockModal(false)}
+//         className="text-sm text-gray-400 underline"
+//       >
+//         Maybe later
+//       </button>
+//     </div>
+//   </div>
+// )}
+
+
+//       {showPaymentModal && (
+//         <PaymentModal
+//           onClose={() => setShowPaymentModal(false)}
+//           onPaymentSuccess={handlePaymentSuccess}
+//         />
+//       )}
+//     </div>
+//   );
+// }
 
 
 
